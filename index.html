@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groq Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #chatbox { width: 100%; max-width: 400px; margin: auto; border: 1px solid #ccc; padding: 10px; }
+        .message { padding: 10px; margin: 5px; border-radius: 5px; }
+        .user { background: #007bff; color: white; text-align: right; }
+        .bot { background: #f1f1f1; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>Chat with Groq AI</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Ask something..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            const chatbox = document.getElementById("chatbox");
+
+            // Display user message
+            const userMessage = `<div class="message user">${userInput}</div>`;
+            chatbox.innerHTML += userMessage;
+
+            // Send request to backend
+            const response = await fetch("https://sally-saline.onrender.com", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            });
+
+            const data = await response.json();
+
+            // Display bot response
+            const botMessage = `<div class="message bot">${data.reply}</div>`;
+            chatbox.innerHTML += botMessage;
+
+            // Clear input field
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</body>
+
+</html>
+ 
