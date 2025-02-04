@@ -15,7 +15,7 @@ app.post("/chatbot", async (req, res) => {
         const userMessage = req.body.message;
 
         const response = await axios.post(
-            "https://api.groq.com/v1/chat/completions",
+            "https://api.groq.com/openai/v1/chat/completions",
             {
                 model: "groq-llama3-8b",
                 messages: [{ role: "user", content: userMessage }],
