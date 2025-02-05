@@ -36,3 +36,35 @@ app.post("/chatbot", async (req, res) => {
 // ✅ Ensure your server listens on the correct port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+const express = require('express');
+const { PythonShell } = require('python-shell');  // To run Python scripts from Node.js
+const app = express();
+const port = 3000;
+
+app.use(express.static('static'));  // Serve static files (CSS, JS, etc.)
+app.use(express.json());           // For parsing JSON requests
+
+// Route to handle chatbot messages
+app.post('/api/chat', (req, res) => {
+    const message = req.body.message;
+    
+    PythonShell.run('chatbot.py', {
+        args: [message]
+    }, (err, result) => {
+        if (err) throw err;
+        res.json({ response: result.join(' ') });
+    });
+});
+
+// Route to handle maintenance prediction request
+app.get('/api/maintenance-prediction', (req, res) => {
+    PythonShell.run('maintenance_prediction.py', null, (err, result) => {
+        if (err) throw err;
+        res.json({ prediction: result.join(' ') });
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
