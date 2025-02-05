@@ -1,6 +1,5 @@
-pip install flask flask-cors groq pandas prettytable opcua paho-mqtt joblib scikit-learn
 
-from difflib import get_close_matches
+import get_close_matches
 from prettytable import PrettyTable
 from datetime import datetime
 from groq import Groq
@@ -11,6 +10,8 @@ import os
 import paho.mqtt.client as mqtt
 from opcua import Client
 import pandas as pd
+import joblib
+from sklearn.preprocessing import StandardScaler
 
 # Add after your imports
 class MaintenanceDataTracker:
@@ -269,18 +270,29 @@ def ai_response(prompt):
 
 
 
-import joblib
-from sklearn.preprocessing import StandardScaler
+# Global variables with proper initialization
+maintenance_tracker = None
+model = None
 
-# Load the saved model and scaler
-# After loading the model
+def initialize_chatbot():
+    """Initialize global variables and models"""
+    global maintenance_tracker, model
+    try:
+        maintenance_tracker = MaintenanceDataTracker()
+        try:
+            model = joblib.load('enhanced_oee_maintenance_predictor.joblib')
+        except Exception as e:
+            print(f"Warning: Could not load model: {str(e)}")
+            model = None
+    except Exception as e:
+        print(f"Error initializing chatbot: {str(e)}")
+        raise
+
+# Initialize when module is imported
 try:
-    model = joblib.load('enhanced_oee_maintenance_predictor.joblib')
+    initialize_chatbot()
 except Exception as e:
-    print(f"Error loading model: {str(e)}")
-
-# Initialize the tracker at the module level
-maintenance_tracker = MaintenanceDataTracker()
+    print(f"Failed to initialize chatbot: {str(e)}")
 
 def get_current_machine_data(for_prediction=False):
     """
@@ -482,9 +494,8 @@ def chatbot(user_input):
     Returns: string response for the user
     """
     try:
-        # Initialize maintenance tracker if not already done
         global maintenance_tracker
-        if not maintenance_tracker:
+        if maintenance_tracker is None:
             maintenance_tracker = MaintenanceDataTracker()
         
         # Handle quit commands
